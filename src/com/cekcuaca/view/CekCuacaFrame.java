@@ -4,6 +4,14 @@
  */
 package com.cekcuaca.view;
 
+import com.cekcuaca.model.*;
+import com.cekcuaca.service.*;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import com.cekcuaca.util.*;
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author slozoy
@@ -15,7 +23,67 @@ public class CekCuacaFrame extends javax.swing.JFrame {
      */
     public CekCuacaFrame() {
         initComponents();
+        loadFavoriteCities(); // Muat favorit dari SQLite saat aplikasi dibuka
     }
+    
+    private String capitalizeWords(String text) {
+        if (text == null || text.isEmpty()) return "";
+        String[] words = text.split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String w : words) {
+            if (w.length() > 1) {
+                sb.append(Character.toUpperCase(w.charAt(0)))
+                  .append(w.substring(1).toLowerCase());
+            } else {
+                sb.append(w.toUpperCase());
+            }
+            sb.append(" ");
+        }
+        return sb.toString().trim();
+    }
+    
+    private void tampilkanCuaca(WeatherData data) {
+        lblCity.setText("Kota: " + capitalizeWords(data.getCity()));
+        lblTemp.setText(String.format("Suhu: %.1f °C", data.getTemperature()));
+        lblHumidity.setText(String.format("Kelembapan: %.0f%%", data.getHumidity()));
+        lblDescription.setText("Cuaca: " + capitalizeWords(data.getDescription()));
+
+        ImageIcon icon = WeatherIconLoader.getIcon(data.getMain());
+        if (icon != null) {
+            lblIcon.setIcon(icon);
+            lblIcon.setText("");
+        } else {
+            lblIcon.setIcon(null);
+            lblIcon.setText("❌ Tidak ada ikon cuaca");
+        }
+
+        // 🔹 aktifkan tombol tambah favorit setelah cek cuaca berhasil
+        btnTambahFavorit.setEnabled(true);
+    }
+
+    private void loadFavoriteCities() {
+        try {
+            cmbFavorite.removeAllItems();
+            java.util.List<String> favorites = DatabaseService.getAllFavorites();
+
+            if (favorites.isEmpty()) {
+                cmbFavorite.setEnabled(false); // tidak ada data → disable
+                System.out.println("Belum ada data favorit di database.");
+            } else {
+                for (String city : favorites) {
+                    cmbFavorite.addItem(city);
+                }
+                cmbFavorite.setEnabled(true); // ada data → enable
+                System.out.println("Berhasil memuat " + favorites.size() + " kota favorit.");
+            }
+
+        } catch (Exception e) {
+            cmbFavorite.setEnabled(false);
+            System.err.println("Gagal memuat data favorit: " + e.getMessage());
+        }
+    }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,21 +94,285 @@ public class CekCuacaFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        txtCity = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        cmbFavorite = new javax.swing.JComboBox<>();
+        btnCekCuaca = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblWeather = new javax.swing.JTable();
+        btnTambahFavorit = new javax.swing.JButton();
+        btnSimpanCSV = new javax.swing.JButton();
+        btnMuatData = new javax.swing.JButton();
+        lblDescription = new javax.swing.JLabel();
+        lblTemp = new javax.swing.JLabel();
+        lblHumidity = new javax.swing.JLabel();
+        lblCity = new javax.swing.JLabel();
+        lblIcon = new javax.swing.JLabel();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setText("2310010054 - Said Muhdaffa Hasyim");
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
+        jLabel2.setText("Aplikasi Cek Cuaca Sederhana");
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel3.setText("Masukkan Nama Kota:");
+
+        txtCity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCityActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setText("Kota Favorit:");
+
+        cmbFavorite.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Pilih Kota Favorit" }));
+        cmbFavorite.setToolTipText("");
+        cmbFavorite.setEnabled(false);
+        cmbFavorite.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cmbFavoriteItemStateChanged(evt);
+            }
+        });
+
+        btnCekCuaca.setText("Cek Cuaca");
+        btnCekCuaca.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCekCuacaActionPerformed(evt);
+            }
+        });
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        tblWeather.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Kota", "Cuaca", "Suhu", "Kelembapan"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tblWeather);
+
+        btnTambahFavorit.setText("Tambahkan ke Favorit");
+        btnTambahFavorit.setEnabled(false);
+        btnTambahFavorit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTambahFavoritActionPerformed(evt);
+            }
+        });
+
+        btnSimpanCSV.setText("Simpan CSV");
+        btnSimpanCSV.setEnabled(false);
+
+        btnMuatData.setText("Muat Data");
+
+        lblDescription.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblDescription.setText("Cuaca: ?");
+
+        lblTemp.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblTemp.setText("Suhu: ?");
+
+        lblHumidity.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblHumidity.setText("Kelembapan: ?");
+
+        lblCity.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblCity.setText("Kota: ?");
+
+        lblIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/default.png"))); // NOI18N
+        lblIcon.setIconTextGap(0);
+        lblIcon.setMaximumSize(new java.awt.Dimension(200, 100));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblCity)
+                            .addComponent(lblDescription)
+                            .addComponent(lblTemp)
+                            .addComponent(lblHumidity))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnTambahFavorit)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnCekCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 67, Short.MAX_VALUE)
+                                .addComponent(txtCity, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cmbFavorite, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(55, 55, 55)))
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnSimpanCSV, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnMuatData, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 409, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(26, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSimpanCSV, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnMuatData, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(31, 31, 31)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbFavorite, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addGap(26, 26, 26)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnTambahFavorit, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCekCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 47, Short.MAX_VALUE)
+                        .addComponent(lblCity)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblDescription)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTemp)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblHumidity)
+                        .addGap(44, 44, 44))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(lblIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(229, 229, 229))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(33, 33, 33)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(405, 405, 405)
+                        .addComponent(jLabel1)))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnTambahFavoritActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahFavoritActionPerformed
+        // TODO add your handling code here:
+        String city = lblCity.getText().replace("Kota: ", "").trim();
+        if (city.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Kota tidak valid!");
+            return;
+        }
+
+        try {
+            DatabaseService.addFavorite(city);
+            JOptionPane.showMessageDialog(this, city + " ditambahkan ke favorit!");
+            loadFavoriteCities();
+            btnTambahFavorit.setEnabled(false); // 🔹 nonaktifkan lagi setelah ditambah
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal menambah favorit: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnTambahFavoritActionPerformed
+
+    private void cmbFavoriteItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbFavoriteItemStateChanged
+        // TODO add your handling code here:
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            String city = (String) cmbFavorite.getSelectedItem();
+            if (city != null && !city.isEmpty()) {
+                try {
+                    WeatherData data = WeatherService.getWeather(city);
+                    tampilkanCuaca(data);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Gagal mengambil data cuaca: " + e.getMessage());
+                }
+            }
+        }
+    }//GEN-LAST:event_cmbFavoriteItemStateChanged
+
+    private void btnCekCuacaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCekCuacaActionPerformed
+        // TODO add your handling code here:
+        String city = txtCity.getText().trim();
+        if (city.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Masukkan nama kota terlebih dahulu!");
+            return;
+        }
+
+        try {
+            WeatherData data = WeatherService.getWeather(city);
+            tampilkanCuaca(data); // panggil fungsi yang sudah kamu pisahkan
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal mengambil data cuaca: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnCekCuacaActionPerformed
+
+    private void txtCityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCityActionPerformed
 
     /**
      * @param args the command line arguments
@@ -78,5 +410,24 @@ public class CekCuacaFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCekCuaca;
+    private javax.swing.JButton btnMuatData;
+    private javax.swing.JButton btnSimpanCSV;
+    private javax.swing.JButton btnTambahFavorit;
+    private javax.swing.JComboBox<String> cmbFavorite;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblCity;
+    private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblHumidity;
+    private javax.swing.JLabel lblIcon;
+    private javax.swing.JLabel lblTemp;
+    private javax.swing.JTable tblWeather;
+    private javax.swing.JTextField txtCity;
     // End of variables declaration//GEN-END:variables
 }
