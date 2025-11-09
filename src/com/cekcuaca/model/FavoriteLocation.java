@@ -9,5 +9,18 @@ package com.cekcuaca.model;
  * @author slozoy
  */
 public class FavoriteLocation {
-    
+    private String cityName;
+
+    public FavoriteLocation(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    @Override
+    public String toString() {
+        return cityName;
+    }
 }

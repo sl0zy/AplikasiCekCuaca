@@ -4,10 +4,15 @@
  */
 package com.cekcuaca;
 
+import com.cekcuaca.view.CekCuacaFrame;
 /**
  *
  * @author slozoy
  */
 public class MainApp {
-    
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(() -> {
+            new CekCuacaFrame().setVisible(true);
+        });
+    }
 }
